@@ -1,0 +1,257 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --matrix-green: #00ff00;
+    --matrix-dark-green: #008800;
+    --matrix-bg: #000000;
+    --matrix-bg-secondary: #0a0a0a;
+    --terminal-font: 'Courier New', monospace;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-black text-green-400;
+    font-family: var(--terminal-font);
+    background: linear-gradient(180deg, #000000 0%, #0a0a0a 100%);
+    min-height: 100vh;
+  }
+
+  /* Matrix rain effect background */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+      repeating-linear-gradient(
+        0deg,
+        rgba(0, 255, 0, 0.03) 0px,
+        transparent 1px,
+        transparent 2px,
+        rgba(0, 255, 0, 0.03) 3px
+      );
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+@layer components {
+  /* Glitch effect */
+  @keyframes glitch {
+    0% {
+      text-shadow: 0.05em 0 0 #00fffc, -0.03em -0.04em 0 #fc00ff,
+        0.025em 0.04em 0 #fffc00;
+    }
+    15% {
+      text-shadow: 0.05em 0 0 #00fffc, -0.03em -0.04em 0 #fc00ff,
+        0.025em 0.04em 0 #fffc00;
+    }
+    16% {
+      text-shadow: -0.05em -0.025em 0 #00fffc, 0.025em 0.035em 0 #fc00ff,
+        -0.05em -0.05em 0 #fffc00;
+    }
+    49% {
+      text-shadow: -0.05em -0.025em 0 #00fffc, 0.025em 0.035em 0 #fc00ff,
+        -0.05em -0.05em 0 #fffc00;
+    }
+    50% {
+      text-shadow: 0.05em 0.035em 0 #00fffc, 0.03em 0 0 #fc00ff,
+        0 -0.04em 0 #fffc00;
+    }
+    99% {
+      text-shadow: 0.05em 0.035em 0 #00fffc, 0.03em 0 0 #fc00ff,
+        0 -0.04em 0 #fffc00;
+    }
+    100% {
+      text-shadow: -0.05em 0 0 #00fffc, -0.025em -0.04em 0 #fc00ff,
+        -0.04em -0.025em 0 #fffc00;
+    }
+  }
+
+  /* Typing animation */
+  @keyframes typing {
+    from {
+      width: 0;
+    }
+    to {
+      width: 100%;
+    }
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* Matrix button */
+  .matrix-button {
+    @apply px-6 py-3 bg-transparent border-2 border-green-400 text-green-400
+           font-mono uppercase tracking-wider transition-all duration-300
+           hover:bg-green-400 hover:text-black hover:shadow-lg
+           hover:shadow-green-400/50 active:scale-95;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .matrix-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.4), transparent);
+    transition: left 0.5s;
+  }
+
+  .matrix-button:hover::before {
+    left: 100%;
+  }
+
+  /* Matrix input */
+  .matrix-input {
+    @apply bg-black border-2 border-green-400 text-green-400 px-4 py-2
+           font-mono focus:outline-none focus:border-green-300 focus:shadow-lg
+           focus:shadow-green-400/30 placeholder-green-700;
+  }
+
+  /* Matrix card */
+  .matrix-card {
+    @apply bg-black/90 border border-green-400/30 backdrop-blur-sm
+           shadow-lg shadow-green-400/10;
+    position: relative;
+  }
+
+  .matrix-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--matrix-green), transparent);
+    animation: scan 2s linear infinite;
+  }
+
+  @keyframes scan {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* Code block styling */
+  .code-block {
+    @apply bg-black border border-green-400/30 rounded-none p-4 font-mono text-sm;
+    position: relative;
+    overflow: auto;
+  }
+
+  .code-block::before {
+    content: '>';
+    @apply absolute top-4 left-2 text-green-400 opacity-50;
+  }
+
+  /* Terminal cursor */
+  .terminal-cursor {
+    display: inline-block;
+    width: 10px;
+    height: 20px;
+    background-color: var(--matrix-green);
+    animation: blink 1s infinite;
+  }
+
+  /* Loading dots */
+  .loading-dots {
+    display: inline-flex;
+    gap: 4px;
+  }
+
+  .loading-dots span {
+    width: 8px;
+    height: 8px;
+    background-color: var(--matrix-green);
+    border-radius: 50%;
+    animation: pulse 1.4s infinite ease-in-out both;
+  }
+
+  .loading-dots span:nth-child(1) {
+    animation-delay: -0.32s;
+  }
+
+  .loading-dots span:nth-child(2) {
+    animation-delay: -0.16s;
+  }
+
+  @keyframes pulse {
+    0%, 80%, 100% {
+      transform: scale(0);
+      opacity: 0.5;
+    }
+    40% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #000;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--matrix-dark-green);
+    border: 1px solid var(--matrix-green);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--matrix-green);
+  }
+}
+
+@layer utilities {
+  .text-matrix {
+    color: var(--matrix-green);
+  }
+
+  .bg-matrix {
+    background-color: var(--matrix-bg);
+  }
+
+  .border-matrix {
+    border-color: var(--matrix-green);
+  }
+
+  .glow-green {
+    text-shadow: 0 0 10px var(--matrix-green);
+  }
+
+  .animate-glitch {
+    animation: glitch 2s infinite;
+  }
+
+  .animate-typing {
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 2px solid var(--matrix-green);
+    animation: typing 3s steps(40, end), blink 0.75s step-end infinite;
+  }
+}
