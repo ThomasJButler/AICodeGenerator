@@ -78,35 +78,37 @@ class GenerationResponse(BaseModel):
 
 
 class AnalysisResponse(BaseModel):
-    valid: bool = Field(description="Whether the code is syntactically valid")
+    syntax_valid: bool = Field(description="Whether the code is syntactically valid")
     language: str = Field(description="Detected/specified language")
-    metrics: CodeMetrics = Field(description="Code quality metrics")
-    issues: List[Dict[str, Any]] = Field(default_factory=list, description="List of identified issues")
+    complexity: int = Field(description="Cyclomatic complexity score")
+    readability_score: float = Field(description="Code readability score (0-100)")
+    performance_score: float = Field(description="Performance score (0-100)")
+    lines_of_code: int = Field(description="Total lines of code")
+    syntax_errors: List[Dict[str, Any]] = Field(default_factory=list, description="List of syntax errors")
     suggestions: List[str] = Field(default_factory=list, description="Improvement suggestions")
+    metrics: Optional[CodeMetrics] = Field(default=None, description="Additional code quality metrics")
     formatted_code: Optional[str] = Field(default=None, description="Formatted version of the code")
     ast_structure: Optional[Dict[str, Any]] = Field(default=None, description="Abstract syntax tree structure")
 
     class Config:
         json_schema_extra = {
             "example": {
-                "valid": True,
+                "syntax_valid": True,
                 "language": "python",
+                "complexity": 2,
+                "readability_score": 88.5,
+                "performance_score": 75.0,
+                "lines_of_code": 10,
+                "syntax_errors": [],
+                "suggestions": [
+                    "Consider adding type hints",
+                    "Add docstring to function"
+                ],
                 "metrics": {
                     "lines_of_code": 10,
                     "cyclomatic_complexity": 2,
                     "readability_score": 88.5
                 },
-                "issues": [
-                    {
-                        "type": "warning",
-                        "line": 5,
-                        "message": "Variable 'x' is not used"
-                    }
-                ],
-                "suggestions": [
-                    "Consider adding type hints",
-                    "Add docstring to function"
-                ],
                 "formatted_code": "def hello():\n    print('Hello, World!')"
             }
         }

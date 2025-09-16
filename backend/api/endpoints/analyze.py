@@ -30,12 +30,23 @@ async def analyze_code(request: AnalysisRequest):
         # Perform analysis
         analysis_result = analyzer_service.analyze_code(request)
 
+        # Extract metrics or use defaults
+        metrics = analysis_result.get("metrics", {})
+
+        # Calculate performance score based on complexity
+        complexity = metrics.get("cyclomatic_complexity", 1)
+        performance_score = max(0, min(100, 100 - (complexity * 5)))  # Simple heuristic
+
         return AnalysisResponse(
-            valid=analysis_result["valid"],
+            syntax_valid=analysis_result.get("valid", True),
             language=request.language.value,
-            metrics=analysis_result.get("metrics"),
-            issues=analysis_result.get("issues", []),
+            complexity=metrics.get("cyclomatic_complexity", 1),
+            readability_score=metrics.get("readability_score", 85.0),
+            performance_score=performance_score,
+            lines_of_code=metrics.get("lines_of_code", 0),
+            syntax_errors=analysis_result.get("issues", []),
             suggestions=analysis_result.get("suggestions", []),
+            metrics=metrics if metrics else None,
             formatted_code=analysis_result.get("formatted_code"),
             ast_structure=analysis_result.get("ast_structure")
         )
