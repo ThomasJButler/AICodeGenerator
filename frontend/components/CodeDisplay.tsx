@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Copy, Check, Download, Maximize2 } from 'lucide-react';
+import { Copy, Check, Download } from 'lucide-react';
 
 interface CodeDisplayProps {
   code: string;
@@ -38,59 +38,86 @@ export function CodeDisplay({
   };
 
   return (
-    <div className="matrix-card p-4">
-      <div className="flex justify-between items-center mb-4 border-b border-green-400/30 pb-2">
-        <h3 className="text-green-400 font-mono text-sm uppercase tracking-wider">
-          {title} [{language.toUpperCase()}]
+    <div className="glass-effect rounded-lg overflow-hidden">
+      <div className="flex justify-between items-center p-4 bg-card border-b border-glass">
+        <h3 className="text-matrix font-medium text-sm flex items-center">
+          <span className="bg-matrix text-black px-2 py-1 rounded text-xs font-semibold mr-2">
+            {language.toUpperCase()}
+          </span>
+          {title}
         </h3>
         <div className="flex space-x-2">
           <button
             onClick={handleCopy}
-            className="p-2 hover:bg-green-400/10 transition-colors"
+            className="p-2 rounded-lg hover:bg-matrix/10 transition-all duration-200 interactive"
             title="Copy code"
           >
             {copied ? (
-              <Check className="w-4 h-4 text-green-400" />
+              <Check className="w-4 h-4 text-success" />
             ) : (
-              <Copy className="w-4 h-4 text-green-400" />
+              <Copy className="w-4 h-4 text-matrix" />
             )}
           </button>
           <button
             onClick={handleDownload}
-            className="p-2 hover:bg-green-400/10 transition-colors"
+            className="p-2 rounded-lg hover:bg-matrix/10 transition-all duration-200 interactive"
             title="Download code"
           >
-            <Download className="w-4 h-4 text-green-400" />
+            <Download className="w-4 h-4 text-matrix" />
           </button>
         </div>
       </div>
 
       <div className="relative">
-        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-green-400 to-transparent opacity-50"></div>
         <SyntaxHighlighter
           language={language}
           style={{
             ...atomDark,
             'pre[class*="language-"]': {
               ...atomDark['pre[class*="language-"]'],
-              background: '#000000',
-              border: '1px solid rgba(0, 255, 0, 0.2)',
-              padding: '1rem',
+              background: 'var(--deep-black)',
+              border: 'none',
+              padding: '1.5rem',
               fontSize: '0.875rem',
-              fontFamily: 'Courier New, monospace',
+              fontFamily: 'var(--font-mono)',
+              lineHeight: '1.6',
             },
             'code[class*="language-"]': {
               ...atomDark['code[class*="language-"]'],
-              background: '#000000',
-              color: '#00ff00',
+              background: 'var(--deep-black)',
+              color: 'var(--text-primary)',
+            },
+            'token.keyword': {
+              color: 'var(--matrix-green)',
+            },
+            'token.string': {
+              color: 'var(--matrix-cyan)',
+            },
+            'token.function': {
+              color: '#ff6b6b',
+            },
+            'token.number': {
+              color: '#feca57',
+            },
+            'token.comment': {
+              color: 'var(--text-muted)',
+              fontStyle: 'italic',
             }
           }}
           showLineNumbers={showLineNumbers}
           customStyle={{
-            background: '#000000',
+            background: 'var(--deep-black)',
             margin: 0,
-            maxHeight: '500px',
-            overflow: 'auto'
+            maxHeight: '600px',
+            overflow: 'auto',
+            borderRadius: '0 0 12px 12px',
+          }}
+          lineNumberStyle={{
+            color: 'var(--text-muted)',
+            backgroundColor: 'transparent',
+            paddingRight: '1rem',
+            borderRight: '1px solid var(--glass-border)',
+            marginRight: '1rem',
           }}
         >
           {code}
