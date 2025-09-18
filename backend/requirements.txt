@@ -7,6 +7,8 @@ pydantic==2.9.0
 pydantic-settings==2.6.0
 
 # AI and Language Processing
+langchain==0.3.0
+langchain-openai==0.2.0
 openai==1.50.0
 tree-sitter==0.20.4
 
