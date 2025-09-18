@@ -221,7 +221,7 @@ export default function Home() {
             </button>
 
             <a
-              href="https://github.com/ThomasJButler/ai-code-generator"
+              href="https://github.com/ThomasJButler/AICodeGenerator"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-secondary flex items-center space-x-2 min-h-[44px]"
