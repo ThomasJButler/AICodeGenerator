@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Terminal, Code, FileText, TestTube, Sparkles, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { Terminal, Code, FileText, TestTube, Sparkles, ArrowLeft, ExternalLink, Github, HelpCircle } from 'lucide-react';
 import { CodeDisplay } from '@/components/CodeDisplay';
 import { MatrixLoader } from '@/components/MatrixLoader';
 import { ProgressBar } from '@/components/ProgressBar';
 import { Notification } from '@/components/Notification';
+import { Footer } from '@/components/Footer';
+import { HowItWorksModal } from '@/components/HowItWorksModal';
 import axios from 'axios';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
@@ -37,10 +39,10 @@ export default function Home() {
   const [showNotification, setShowNotification] = useState(false);
   const [progress, setProgress] = useState(0);
   const [statusMessage, setStatusMessage] = useState('');
-  const [currentResultIndex, setCurrentResultIndex] = useState(0);
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
 
-  const funnyStatusMessages = [
+  const funnyStatusMessages = useMemo(() => [
     'Flibbertigibberting the algorithms...',
     'Reticulating splines...',
     'Optimizing quantum flux capacitors...',
@@ -55,8 +57,28 @@ export default function Home() {
     'Polishing the pixels...',
     'Debugging the debugger...',
     'Summoning the syntax spirits...',
-    'Organizing chaos into order...'
-  ];
+    'Organizing chaos into order...',
+    'Negotiating with the API overlords...',
+    'Bribing the syntax checker...',
+    'Teaching AI to be creative...',
+    'Untangling spaghetti code...',
+    'Convincing the server to cooperate...',
+    'Channeling the spirit of Turing...',
+    'Asking Stack Overflow for help...',
+    'Performing digital alchemy...',
+    'Consulting the coding oracle...',
+    'Translating human thoughts to machine...',
+    'Optimizing the hamster wheels...',
+    'Defragmenting the neural networks...',
+    'Calibrating the chaos engine...',
+    'Synchronizing with the matrix...',
+    'Awakening the dormant algorithms...',
+    'Brewing the perfect code blend...',
+    'Polishing the logic diamonds...',
+    'Tuning the frequency of brilliance...',
+    'Assembling the digital symphony...',
+    'Weaving the fabric of functionality...'
+  ], []);
 
   const programmingLanguages = [
     { value: 'python', label: 'Python' },
@@ -84,7 +106,7 @@ export default function Home() {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [loading, prompt]);
+  }, [loading, prompt]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Smooth scroll to results after generation
   useEffect(() => {
@@ -96,7 +118,7 @@ export default function Home() {
     }
   }, [results.length]);
 
-  const handleGenerate = async () => {
+  const handleGenerate = useCallback(async () => {
     if (!prompt.trim()) {
       setError('Please enter a prompt');
       return;
@@ -119,7 +141,7 @@ export default function Home() {
     const messageInterval = setInterval(() => {
       messageIndex = (messageIndex + 1) % funnyStatusMessages.length;
       setStatusMessage(funnyStatusMessages[messageIndex]);
-    }, 2500); // Change message every 2.5 seconds
+    }, 5000); // Change message every 5 seconds
 
     try {
       const response = await axios.post(`${API_URL}/generate`, {
@@ -152,12 +174,17 @@ export default function Home() {
       // Reset form
       setPrompt('');
       setProjectGoals('');
-    } catch (err: any) {
+    } catch (err: unknown) {
       clearInterval(progressInterval);
       clearInterval(messageInterval);
       setProgress(0);
       setStatusMessage('');
-      setError(err.response?.data?.detail || 'Generation failed. Please try again.');
+      const errorMessage = err instanceof Error
+        ? err.message
+        : (err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response && err.response.data && typeof err.response.data === 'object' && 'detail' in err.response.data)
+          ? String(err.response.data.detail)
+          : 'Generation failed. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
       setTimeout(() => {
@@ -165,12 +192,49 @@ export default function Home() {
         setStatusMessage('');
       }, 2000);
     }
-  };
+  }, [prompt, language, naturalLanguage, projectGoals, includeTests, includeDocs, funnyStatusMessages]);
 
   return (
-    <div className="min-h-screen p-4 md:p-8 relative z-10">
-      {/* Header */}
-      <header className="mb-12 text-center animate-fade-in">
+    <div className="min-h-screen relative z-10">
+      {/* Navigation Header */}
+      <nav className="p-4 md:p-6 border-b border-glass">
+        <div className="max-w-6xl mx-auto flex justify-between items-center">
+          <a
+            href="https://www.aitomatic.io/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-secondary flex items-center space-x-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Back to Portfolio</span>
+          </a>
+
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => setShowHowItWorks(true)}
+              className="btn-secondary flex items-center space-x-2"
+            >
+              <HelpCircle className="w-4 h-4" />
+              <span>How It Works</span>
+            </button>
+
+            <a
+              href="https://github.com/ThomasJButler/ai-code-generator"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-secondary flex items-center space-x-2"
+            >
+              <Github className="w-4 h-4" />
+              <span>GitHub Repo</span>
+              <ExternalLink className="w-4 h-4" />
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <div className="p-4 md:p-8">
+        {/* Header */}
+        <header className="mb-12 text-center animate-fade-in">
         <h1 className="text-responsive font-bold text-primary mb-4 text-matrix">
           AI CODE GENERATOR
         </h1>
@@ -179,10 +243,13 @@ export default function Home() {
         </p>
       </header>
 
+      {/* Section Divider */}
+      <div className="section-divider section-divider-animated"></div>
+
       {/* Main Input Section */}
       <div className="max-w-6xl mx-auto">
         <div className="glass-card animate-scale-in">
-          <div className="grid gap-6">
+          <div className="grid gap-8">
             {/* Prompt Input */}
             <div>
               <label className="block text-matrix text-sm font-medium mb-3 flex items-center">
@@ -198,7 +265,7 @@ export default function Home() {
             </div>
 
             {/* Language Selection */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <label className="block text-matrix text-sm font-medium mb-3 flex items-center">
                   <Code className="w-4 h-4 mr-2" />
@@ -252,7 +319,7 @@ export default function Home() {
             </div>
 
             {/* Options */}
-            <div className="flex flex-wrap gap-6">
+            <div className="flex flex-wrap gap-8">
               <label className="flex items-center text-secondary cursor-pointer interactive">
                 <input
                   type="checkbox"
@@ -304,55 +371,51 @@ export default function Home() {
             </div>
           </div>
         </div>
+      </div>
 
         {/* Results Section */}
         {results.length > 0 && (
-          <div ref={resultsRef} className="space-y-8 animate-fade-in">
-            <h2 className="text-3xl font-bold text-matrix mb-6">
-              Generated Results [{results.length}/3]
-            </h2>
+          <>
+            {/* Section Divider */}
+            <div className="section-divider"></div>
 
-            {results.map((result, index) => (
-              <div key={result.id} className="glass-card animate-scale-in" style={{ animationDelay: `${index * 100}ms` }}>
-                {/* Tab Navigation with Result Counter */}
-                <div className="flex justify-between items-center p-4 border-b border-glass">
-                  <div className="tab-nav">
-                    <button
-                      onClick={() => {
-                        setActiveTab('code');
-                        setCurrentResultIndex(index);
-                      }}
-                      className={`tab-button ${activeTab === 'code' ? 'active' : ''}`}
-                    >
-                      Code
-                    </button>
-                    {result.tests && (
+            <div ref={resultsRef} className="space-y-8 animate-fade-in">
+              <h2 className="text-3xl font-bold text-matrix mb-6">
+                Generated Results
+              </h2>
+
+              {results.map((result, index) => (
+                <div key={result.id} className="glass-card animate-scale-in" style={{ animationDelay: `${index * 100}ms` }}>
+                  {/* Tab Navigation with Result Counter */}
+                  <div className="flex justify-between items-center p-4 border-b border-glass">
+                    <div className="tab-nav">
                       <button
-                        onClick={() => {
-                          setActiveTab('tests');
-                          setCurrentResultIndex(index);
-                        }}
-                        className={`tab-button ${activeTab === 'tests' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('code')}
+                        className={`tab-button ${activeTab === 'code' ? 'active' : ''}`}
                       >
-                        Tests
+                        Code
                       </button>
-                    )}
-                    {result.documentation && (
-                      <button
-                        onClick={() => {
-                          setActiveTab('docs');
-                          setCurrentResultIndex(index);
-                        }}
-                        className={`tab-button ${activeTab === 'docs' ? 'active' : ''}`}
-                      >
-                        Documentation
-                      </button>
-                    )}
+                      {result.tests && (
+                        <button
+                          onClick={() => setActiveTab('tests')}
+                          className={`tab-button ${activeTab === 'tests' ? 'active' : ''}`}
+                        >
+                          Tests
+                        </button>
+                      )}
+                      {result.documentation && (
+                        <button
+                          onClick={() => setActiveTab('docs')}
+                          className={`tab-button ${activeTab === 'docs' ? 'active' : ''}`}
+                        >
+                          Documentation
+                        </button>
+                      )}
+                    </div>
+                    <div className="text-sm text-secondary">
+                      Result <span className="text-matrix font-semibold">{index + 1}</span>/{results.length}
+                    </div>
                   </div>
-                  <div className="text-sm text-secondary">
-                    Result <span className="text-matrix font-semibold">{index + 1}</span>/{results.length}
-                  </div>
-                </div>
 
                 {/* Tab Content */}
                 {activeTab === 'code' && (
@@ -402,7 +465,8 @@ export default function Home() {
                 )}
               </div>
             ))}
-          </div>
+            </div>
+          </>
         )}
 
         {/* Success Notification */}
@@ -414,6 +478,15 @@ export default function Home() {
           />
         )}
       </div>
+
+      {/* How It Works Modal */}
+      <HowItWorksModal
+        isOpen={showHowItWorks}
+        onClose={() => setShowHowItWorks(false)}
+      />
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

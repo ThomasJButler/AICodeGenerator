@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { Copy, Check, Download, Maximize2 } from 'lucide-react';
+import { Copy, Check, Download } from 'lucide-react';
 
 interface CodeDisplayProps {
   code: string;
