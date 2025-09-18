@@ -2,6 +2,8 @@
 
 A powerful AI-powered code generation platform that creates production-ready code with unit tests and documentation.
 
+<img width="1382" height="843" alt="image" src="https://github.com/user-attachments/assets/b91e798e-df62-48c5-8100-6ad043edcabc" />
+
 ## Features
 
 - 🚀 **Multi-Language Support**: Generate code in Python, JavaScript, TypeScript, Java, C#, Go, Rust, C++, Ruby, and Swift
