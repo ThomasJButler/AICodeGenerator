@@ -1,0 +1,48 @@
+services:
+  - type: web
+    name: ai-code-generator-backend
+    env: python
+    region: oregon
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: DEBUG
+        value: False
+      - key: ENVIRONMENT
+        value: production
+      - key: API_HOST
+        value: 0.0.0.0
+      - key: API_PREFIX
+        value: /api
+      - key: APP_NAME
+        value: AI Code Generator
+      - key: APP_VERSION
+        value: 1.0.0
+      - key: OPENAI_MODEL
+        value: gpt-4-turbo-preview
+      - key: OPENAI_TEMPERATURE
+        value: 0.7
+      - key: OPENAI_MAX_TOKENS
+        value: 4000
+      - key: USE_CACHE
+        value: False
+      - key: RATE_LIMIT_REQUESTS
+        value: 100
+      - key: RATE_LIMIT_PERIOD
+        value: 3600
+      - key: MAX_CONCURRENT_GENERATIONS
+        value: 3
+      - key: MAX_CODE_LENGTH
+        value: 10000
+      - key: MAX_PROMPT_LENGTH
+        value: 2000
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: JWT_EXPIRATION_MINUTES
+        value: 10080
+    # Add these secrets manually in Render dashboard:
+    # OPENAI_API_KEY (required)
+    # SECRET_KEY (generate new 32-char key)
+    # CORS_ORIGINS (JSON array with your frontend domains)
