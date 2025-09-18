@@ -24,7 +24,7 @@ export function ProgressBar({ progress, className = '', showText = true, statusM
       )}
       <div className="progress-bar">
         <div
-          className="h-full bg-gradient-to-r from-matrix to-cyan rounded-full transition-all duration-1000 ease-out"
+          className="progress-bar-fill"
           style={{ width: `${clampedProgress}%` }}
         />
       </div>
