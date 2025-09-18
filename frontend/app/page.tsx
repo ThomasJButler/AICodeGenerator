@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Terminal, Code, FileText, TestTube, Sparkles, CheckCircle } from 'lucide-react';
 import { CodeDisplay } from '@/components/CodeDisplay';
 import { MatrixLoader } from '@/components/MatrixLoader';
@@ -36,6 +36,27 @@ export default function Home() {
   const [error, setError] = useState('');
   const [showNotification, setShowNotification] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [statusMessage, setStatusMessage] = useState('');
+  const [currentResultIndex, setCurrentResultIndex] = useState(0);
+  const resultsRef = useRef<HTMLDivElement>(null);
+
+  const funnyStatusMessages = [
+    'Flibbertigibberting the algorithms...',
+    'Reticulating splines...',
+    'Optimizing quantum flux capacitors...',
+    'Teaching electrons to dance...',
+    'Herding digital cats...',
+    'Calibrating the coffee machine...',
+    'Convincing bits to behave...',
+    'Shuffling bytes around...',
+    'Tickling the transistors...',
+    'Whispering to the compiler...',
+    'Feeding the code gremlins...',
+    'Polishing the pixels...',
+    'Debugging the debugger...',
+    'Summoning the syntax spirits...',
+    'Organizing chaos into order...'
+  ];
 
   const programmingLanguages = [
     { value: 'python', label: 'Python' },
@@ -50,6 +71,31 @@ export default function Home() {
     { value: 'swift', label: 'Swift' }
   ];
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+        event.preventDefault();
+        if (!loading && prompt.trim()) {
+          handleGenerate();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [loading, prompt]);
+
+  // Smooth scroll to results after generation
+  useEffect(() => {
+    if (results.length > 0 && resultsRef.current) {
+      resultsRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
+  }, [results.length]);
+
   const handleGenerate = async () => {
     if (!prompt.trim()) {
       setError('Please enter a prompt');
@@ -59,14 +105,21 @@ export default function Home() {
     setLoading(true);
     setError('');
     setProgress(0);
+    setStatusMessage(funnyStatusMessages[0]);
 
-    // Simulate progress updates
+    // Simulate progress updates with funny status messages
+    let messageIndex = 0;
     const progressInterval = setInterval(() => {
       setProgress(prev => {
         if (prev >= 90) return prev;
-        return prev + Math.random() * 15;
+        return prev + Math.random() * 7; // Slower progress increments
       });
-    }, 1000);
+    }, 1500); // Slower progress updates
+
+    const messageInterval = setInterval(() => {
+      messageIndex = (messageIndex + 1) % funnyStatusMessages.length;
+      setStatusMessage(funnyStatusMessages[messageIndex]);
+    }, 2500); // Change message every 2.5 seconds
 
     try {
       const response = await axios.post(`${API_URL}/generate`, {
@@ -80,7 +133,9 @@ export default function Home() {
       });
 
       clearInterval(progressInterval);
+      clearInterval(messageInterval);
       setProgress(100);
+      setStatusMessage('Code generation complete!');
 
       const newResult: GenerationResult = {
         id: response.data.id,
@@ -99,11 +154,16 @@ export default function Home() {
       setProjectGoals('');
     } catch (err: any) {
       clearInterval(progressInterval);
+      clearInterval(messageInterval);
       setProgress(0);
+      setStatusMessage('');
       setError(err.response?.data?.detail || 'Generation failed. Please try again.');
     } finally {
       setLoading(false);
-      setTimeout(() => setProgress(0), 2000);
+      setTimeout(() => {
+        setProgress(0);
+        setStatusMessage('');
+      }, 2000);
     }
   };
 
@@ -171,7 +231,7 @@ export default function Home() {
                   <option value="spanish">Spanish</option>
                   <option value="french">French</option>
                   <option value="german">German</option>
-                  <option value="chinese">Chinese</option>
+                  <option value="chinese">Chinese (Mandarin)</option>
                 </select>
               </div>
             </div>
@@ -225,59 +285,78 @@ export default function Home() {
             {/* Progress Bar */}
             {loading && (
               <div className="animate-fade-in">
-                <ProgressBar progress={progress} />
+                <ProgressBar progress={progress} statusMessage={statusMessage} />
               </div>
             )}
 
             {/* Generate Button */}
-            <button
-              onClick={handleGenerate}
-              disabled={loading}
-              className={`btn-primary w-full ${loading ? 'loading' : ''}`}
-            >
-              {loading ? <MatrixLoader /> : 'Generate Code'}
-            </button>
+            <div className="space-y-2">
+              <button
+                onClick={handleGenerate}
+                disabled={loading}
+                className={`btn-primary w-full ${loading ? 'loading' : ''}`}
+              >
+                {loading ? <MatrixLoader /> : 'Generate Code'}
+              </button>
+              <p className="text-xs text-muted text-center">
+                Press <kbd className="px-2 py-1 bg-glass-bg border border-glass rounded text-matrix">⌘ + Enter</kbd> or <kbd className="px-2 py-1 bg-glass-bg border border-glass rounded text-matrix">Ctrl + Enter</kbd> to generate
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Results Section */}
         {results.length > 0 && (
-          <div className="space-y-8 animate-fade-in">
+          <div ref={resultsRef} className="space-y-8 animate-fade-in">
             <h2 className="text-3xl font-bold text-matrix mb-6">
               Generated Results [{results.length}/3]
             </h2>
 
             {results.map((result, index) => (
               <div key={result.id} className="glass-card animate-scale-in" style={{ animationDelay: `${index * 100}ms` }}>
-                {/* Tab Navigation */}
-                <div className="tab-nav">
-                  <button
-                    onClick={() => setActiveTab('code')}
-                    className={`tab-button ${activeTab === 'code' ? 'active' : ''}`}
-                  >
-                    Code
-                  </button>
-                  {result.tests && (
+                {/* Tab Navigation with Result Counter */}
+                <div className="flex justify-between items-center p-4 border-b border-glass">
+                  <div className="tab-nav">
                     <button
-                      onClick={() => setActiveTab('tests')}
-                      className={`tab-button ${activeTab === 'tests' ? 'active' : ''}`}
+                      onClick={() => {
+                        setActiveTab('code');
+                        setCurrentResultIndex(index);
+                      }}
+                      className={`tab-button ${activeTab === 'code' ? 'active' : ''}`}
                     >
-                      Tests
+                      Code
                     </button>
-                  )}
-                  {result.documentation && (
-                    <button
-                      onClick={() => setActiveTab('docs')}
-                      className={`tab-button ${activeTab === 'docs' ? 'active' : ''}`}
-                    >
-                      Documentation
-                    </button>
-                  )}
+                    {result.tests && (
+                      <button
+                        onClick={() => {
+                          setActiveTab('tests');
+                          setCurrentResultIndex(index);
+                        }}
+                        className={`tab-button ${activeTab === 'tests' ? 'active' : ''}`}
+                      >
+                        Tests
+                      </button>
+                    )}
+                    {result.documentation && (
+                      <button
+                        onClick={() => {
+                          setActiveTab('docs');
+                          setCurrentResultIndex(index);
+                        }}
+                        className={`tab-button ${activeTab === 'docs' ? 'active' : ''}`}
+                      >
+                        Documentation
+                      </button>
+                    )}
+                  </div>
+                  <div className="text-sm text-secondary">
+                    Result <span className="text-matrix font-semibold">{index + 1}</span>/{results.length}
+                  </div>
                 </div>
 
                 {/* Tab Content */}
                 {activeTab === 'code' && (
-                  <div className="animate-fade-in">
+                  <div className="tab-content">
                     <CodeDisplay
                       code={result.code}
                       language={result.language}
@@ -303,7 +382,7 @@ export default function Home() {
                 )}
 
                 {activeTab === 'tests' && result.tests && (
-                  <div className="animate-fade-in">
+                  <div className="tab-content">
                     <CodeDisplay
                       code={result.tests}
                       language={result.language}
@@ -313,7 +392,7 @@ export default function Home() {
                 )}
 
                 {activeTab === 'docs' && result.documentation && (
-                  <div className="animate-fade-in">
+                  <div className="tab-content">
                     <div className="glass-effect p-6 rounded-lg">
                       <pre className="text-secondary font-mono text-sm whitespace-pre-wrap leading-relaxed">
                         {result.documentation}
