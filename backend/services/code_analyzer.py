@@ -1,7 +1,13 @@
 import logging
 from typing import Dict, List, Any, Optional
-import tree_sitter_languages as tsl
-from tree_sitter import Node
+try:
+    import tree_sitter_languages as tsl
+    from tree_sitter import Node
+    TREE_SITTER_AVAILABLE = True
+except ImportError:
+    TREE_SITTER_AVAILABLE = False
+    logger = logging.getLogger(__name__)
+    logger.warning("tree-sitter-languages not available, using fallback analysis")
 import black
 import autopep8
 
@@ -17,6 +23,10 @@ class CodeAnalyzerService:
 
     def _init_parsers(self):
         """Initialize Tree-sitter parsers for supported languages"""
+        if not TREE_SITTER_AVAILABLE:
+            logger.warning("Tree-sitter not available, syntax parsing will be limited")
+            return
+
         language_mappings = {
             "python": "python",
             "javascript": "javascript",
@@ -84,6 +94,24 @@ class CodeAnalyzerService:
         """Check syntax using Tree-sitter"""
         result = {"valid": True, "issues": [], "ast": None}
 
+        if not TREE_SITTER_AVAILABLE:
+            # Fallback: basic syntax check using compile for Python
+            if language == "python":
+                try:
+                    compile(code, '<string>', 'exec')
+                    result["valid"] = True
+                except SyntaxError as e:
+                    result["valid"] = False
+                    result["issues"].append({
+                        "type": "error",
+                        "message": f"Syntax error: {str(e)}",
+                        "line": e.lineno if e.lineno else None
+                    })
+            else:
+                # For other languages, assume valid syntax
+                result["valid"] = True
+            return result
+
         if language not in self.parsers:
             result["issues"].append({
                 "type": "error",
@@ -115,8 +143,11 @@ class CodeAnalyzerService:
             })
             return result
 
-    def _find_syntax_errors(self, node: Node, errors: List[Dict] = None) -> List[Dict]:
+    def _find_syntax_errors(self, node, errors: List[Dict] = None) -> List[Dict]:
         """Recursively find syntax errors in the AST"""
+        if not TREE_SITTER_AVAILABLE:
+            return []
+
         if errors is None:
             errors = []
 
@@ -133,8 +164,11 @@ class CodeAnalyzerService:
 
         return errors
 
-    def _node_to_dict(self, node: Node) -> Dict[str, Any]:
+    def _node_to_dict(self, node) -> Dict[str, Any]:
         """Convert Tree-sitter node to dictionary"""
+        if not TREE_SITTER_AVAILABLE:
+            return {}
+
         return {
             "type": node.type,
             "start": {"line": node.start_point[0], "column": node.start_point[1]},

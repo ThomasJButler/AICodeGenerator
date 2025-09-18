@@ -30,16 +30,43 @@ async def analyze_code(request: AnalysisRequest):
         # Perform analysis
         analysis_result = analyzer_service.analyze_code(request)
 
+        # Extract metrics or use defaults
+        metrics = analysis_result.get("metrics")
+
+        # Calculate performance score based on complexity
+        if metrics:
+            complexity = metrics.cyclomatic_complexity
+            readability = metrics.readability_score
+            lines_of_code = metrics.lines_of_code
+        else:
+            complexity = 1
+            readability = 85.0
+            lines_of_code = 0
+
+        performance_score = max(0, min(100, 100 - (complexity * 5)))  # Simple heuristic
+
+        logger.debug(f"Analysis result: valid={analysis_result.get('valid')}, complexity={complexity}")
+
         return AnalysisResponse(
-            valid=analysis_result["valid"],
+            syntax_valid=analysis_result.get("valid", True),
             language=request.language.value,
-            metrics=analysis_result.get("metrics"),
-            issues=analysis_result.get("issues", []),
+            complexity=complexity,
+            readability_score=readability,
+            performance_score=performance_score,
+            lines_of_code=lines_of_code,
+            syntax_errors=analysis_result.get("issues", []),
             suggestions=analysis_result.get("suggestions", []),
+            metrics=metrics,
             formatted_code=analysis_result.get("formatted_code"),
             ast_structure=analysis_result.get("ast_structure")
         )
 
+    except ValueError as e:
+        logger.error(f"Code analysis validation error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid request data: {str(e)}"
+        )
     except Exception as e:
         logger.error(f"Code analysis failed: {str(e)}")
         raise HTTPException(
@@ -61,6 +88,7 @@ async def format_code(request: AnalysisRequest):
     """Format code according to language standards"""
     try:
         logger.info(f"Formatting {request.language.value} code")
+        logger.debug(f"Format request: language={request.language.value}, code_length={len(request.code)}")
 
         # Create a modified request with format_code=True
         format_request = AnalysisRequest(
