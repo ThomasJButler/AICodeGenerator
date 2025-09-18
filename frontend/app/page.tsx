@@ -203,30 +203,33 @@ export default function Home() {
             href="https://www.aitomatic.io/"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-secondary flex items-center space-x-2"
+            className="btn-secondary flex items-center space-x-2 min-h-[44px]"
+            title="Back to Portfolio"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Back to Portfolio</span>
+            <span className="hidden sm:inline">Back to Portfolio</span>
           </a>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <button
               onClick={() => setShowHowItWorks(true)}
-              className="btn-secondary flex items-center space-x-2"
+              className="btn-secondary flex items-center space-x-2 min-h-[44px]"
+              title="How It Works"
             >
               <HelpCircle className="w-4 h-4" />
-              <span>How It Works</span>
+              <span className="hidden sm:inline">How It Works</span>
             </button>
 
             <a
               href="https://github.com/ThomasJButler/ai-code-generator"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-secondary flex items-center space-x-2"
+              className="btn-secondary flex items-center space-x-2 min-h-[44px]"
+              title="GitHub Repository"
             >
               <Github className="w-4 h-4" />
-              <span>GitHub Repo</span>
-              <ExternalLink className="w-4 h-4" />
+              <span className="hidden sm:inline">GitHub Repo</span>
+              <ExternalLink className="w-4 h-4 hidden sm:inline" />
             </a>
           </div>
         </div>
@@ -235,10 +238,10 @@ export default function Home() {
       <div className="p-4 md:p-8">
         {/* Header */}
         <header className="mb-12 text-center animate-fade-in">
-        <h1 className="text-responsive font-bold text-primary mb-4 text-matrix">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-primary mb-4 text-matrix">
           AI CODE GENERATOR
         </h1>
-        <p className="text-secondary text-lg md:text-xl">
+        <p className="text-secondary text-base sm:text-lg md:text-xl max-w-2xl mx-auto">
           Generate production-ready code with AI assistance
         </p>
       </header>
@@ -319,26 +322,26 @@ export default function Home() {
             </div>
 
             {/* Options */}
-            <div className="flex flex-wrap gap-8">
-              <label className="flex items-center text-secondary cursor-pointer interactive">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-8">
+              <label className="flex items-center text-secondary cursor-pointer interactive min-h-[44px]">
                 <input
                   type="checkbox"
                   checked={includeTests}
                   onChange={(e) => setIncludeTests(e.target.checked)}
-                  className="mr-3 w-4 h-4 text-matrix bg-transparent border-glass rounded focus:ring-matrix"
+                  className="mr-3 w-5 h-5 text-matrix bg-transparent border-glass rounded focus:ring-matrix"
                 />
                 <TestTube className="w-4 h-4 mr-2" />
-                Generate Tests
+                <span className="text-sm sm:text-base">Generate Tests</span>
               </label>
-              <label className="flex items-center text-secondary cursor-pointer interactive">
+              <label className="flex items-center text-secondary cursor-pointer interactive min-h-[44px]">
                 <input
                   type="checkbox"
                   checked={includeDocs}
                   onChange={(e) => setIncludeDocs(e.target.checked)}
-                  className="mr-3 w-4 h-4 text-matrix bg-transparent border-glass rounded focus:ring-matrix"
+                  className="mr-3 w-5 h-5 text-matrix bg-transparent border-glass rounded focus:ring-matrix"
                 />
                 <FileText className="w-4 h-4 mr-2" />
-                Generate Documentation
+                <span className="text-sm sm:text-base">Generate Documentation</span>
               </label>
             </div>
 

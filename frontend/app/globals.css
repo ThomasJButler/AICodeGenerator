@@ -110,6 +110,8 @@
     letter-spacing: 0.05em;
     position: relative;
     overflow: hidden;
+    min-height: 44px;
+    min-width: 44px;
   }
 
   .btn-primary:hover {
@@ -139,6 +141,8 @@
     cursor: pointer;
     transition: all var(--duration-normal) var(--ease-smooth);
     font-family: var(--font-primary);
+    min-height: 44px;
+    min-width: 44px;
   }
 
   .btn-secondary:hover {
@@ -158,6 +162,7 @@
     font-family: var(--font-primary);
     transition: all var(--duration-normal) var(--ease-smooth);
     backdrop-filter: blur(8px);
+    min-height: 44px;
   }
 
   .glass-input:focus {
@@ -187,6 +192,7 @@
     background-repeat: no-repeat;
     background-size: 16px;
     padding-right: 40px;
+    min-height: 44px;
   }
 
   .glass-select:focus {
