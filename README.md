@@ -171,10 +171,6 @@ AICodeGenerator/
 └── CLAUDE.md                # Development guide
 ```
 
-## Contributing
-
-See CLAUDE.md for detailed development guidelines and architecture documentation.
-
 ## License
 
 MIT
