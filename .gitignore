@@ -189,6 +189,8 @@ ENV/
 env.bak/
 venv.bak/
 backend/.env
+frontend/.env.local
+.env
 
 # IDEs
 .vscode/
