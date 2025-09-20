@@ -1,16 +1,17 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { Terminal, Code, FileText, TestTube, Sparkles, ArrowLeft, ExternalLink, Github, HelpCircle } from 'lucide-react';
+import { Terminal, Code, FileText, TestTube, Sparkles, ArrowLeft, ExternalLink, Github, HelpCircle, Settings } from 'lucide-react';
 import { CodeDisplay } from '@/components/CodeDisplay';
 import { MatrixLoader } from '@/components/MatrixLoader';
 import { ProgressBar } from '@/components/ProgressBar';
 import { Notification } from '@/components/Notification';
 import { Footer } from '@/components/Footer';
 import { HowItWorksModal } from '@/components/HowItWorksModal';
+import { ApiKeySetup } from '@/components/ApiKeySetup';
 import axios from 'axios';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 interface GenerationResult {
   id: string;
@@ -40,6 +41,9 @@ export default function Home() {
   const [progress, setProgress] = useState(0);
   const [statusMessage, setStatusMessage] = useState('');
   const [showHowItWorks, setShowHowItWorks] = useState(false);
+  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [showApiKeySetup, setShowApiKeySetup] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const funnyStatusMessages = useMemo(() => [
@@ -93,12 +97,22 @@ export default function Home() {
     { value: 'swift', label: 'Swift' }
   ];
 
+  // Check for stored API key on mount
+  useEffect(() => {
+    const storedKey = localStorage.getItem('openai_api_key');
+    if (storedKey) {
+      setApiKey(storedKey);
+    } else {
+      setShowApiKeySetup(true);
+    }
+  }, []);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
         event.preventDefault();
-        if (!loading && prompt.trim()) {
+        if (!loading && prompt.trim() && apiKey) {
           handleGenerate();
         }
       }
@@ -106,7 +120,7 @@ export default function Home() {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [loading, prompt]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [loading, prompt, apiKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Smooth scroll to results after generation
   useEffect(() => {
@@ -118,9 +132,27 @@ export default function Home() {
     }
   }, [results.length]);
 
+  const handleApiKeySet = (key: string) => {
+    setApiKey(key);
+    setShowApiKeySetup(false);
+  };
+
+  const handleRemoveApiKey = () => {
+    localStorage.removeItem('openai_api_key');
+    setApiKey(null);
+    setShowApiKeySetup(true);
+    setShowSettings(false);
+  };
+
   const handleGenerate = useCallback(async () => {
     if (!prompt.trim()) {
       setError('Please enter a prompt');
+      return;
+    }
+
+    if (!apiKey) {
+      setError('Please set up your OpenAI API key first');
+      setShowApiKeySetup(true);
       return;
     }
 
@@ -152,6 +184,11 @@ export default function Home() {
         include_tests: includeTests,
         include_docs: includeDocs,
         complexity_level: 'intermediate'
+      }, {
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        }
       });
 
       clearInterval(progressInterval);
@@ -192,7 +229,7 @@ export default function Home() {
         setStatusMessage('');
       }, 2000);
     }
-  }, [prompt, language, naturalLanguage, projectGoals, includeTests, includeDocs, funnyStatusMessages]);
+  }, [prompt, language, naturalLanguage, projectGoals, includeTests, includeDocs, funnyStatusMessages, apiKey]);
 
   return (
     <div className="min-h-screen relative z-10">
@@ -219,6 +256,17 @@ export default function Home() {
               <HelpCircle className="w-4 h-4" />
               <span className="hidden sm:inline">How It Works</span>
             </button>
+
+            {apiKey && (
+              <button
+                onClick={() => setShowSettings(true)}
+                className="btn-secondary flex items-center space-x-2 min-h-[44px]"
+                title="Settings"
+              >
+                <Settings className="w-4 h-4" />
+                <span className="hidden sm:inline">Settings</span>
+              </button>
+            )}
 
             <a
               href="https://github.com/ThomasJButler/AICodeGenerator"
@@ -363,13 +411,24 @@ export default function Home() {
             <div className="space-y-2">
               <button
                 onClick={handleGenerate}
-                disabled={loading}
-                className={`btn-primary w-full ${loading ? 'loading' : ''}`}
+                disabled={loading || !apiKey}
+                className={`btn-primary w-full ${loading || !apiKey ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
-                {loading ? <MatrixLoader /> : 'Generate Code'}
+                {loading ? <MatrixLoader /> : !apiKey ? 'Set up API Key to Generate' : 'Generate Code'}
               </button>
               <p className="text-xs text-muted text-center">
-                Press <kbd className="px-2 py-1 bg-glass-bg border border-glass rounded text-matrix">⌘ + Enter</kbd> or <kbd className="px-2 py-1 bg-glass-bg border border-glass rounded text-matrix">Ctrl + Enter</kbd> to generate
+                {apiKey ? (
+                  <>
+                    Press <kbd className="px-2 py-1 bg-glass-bg border border-glass rounded text-matrix">⌘ + Enter</kbd> or <kbd className="px-2 py-1 bg-glass-bg border border-glass rounded text-matrix">Ctrl + Enter</kbd> to generate
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setShowApiKeySetup(true)}
+                    className="text-matrix hover:underline"
+                  >
+                    Click here to set up your OpenAI API key
+                  </button>
+                )}
               </p>
             </div>
           </div>
@@ -481,6 +540,69 @@ export default function Home() {
           />
         )}
       </div>
+
+      {/* API Key Setup Modal */}
+      {showApiKeySetup && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="relative max-w-lg w-full">
+            <button
+              onClick={() => !apiKey ? null : setShowApiKeySetup(false)}
+              className={`absolute top-4 right-4 z-10 p-2 rounded-full bg-glass-bg border border-glass text-secondary hover:text-matrix transition-colors ${!apiKey ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={!apiKey}
+            >
+              ✕
+            </button>
+            <ApiKeySetup
+              onApiKeySet={handleApiKeySet}
+              showSkip={!!apiKey}
+              onSkip={() => setShowApiKeySetup(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Settings Modal */}
+      {showSettings && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass-card max-w-md w-full animate-scale-in">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-matrix">Settings</h2>
+              <button
+                onClick={() => setShowSettings(false)}
+                className="p-2 rounded-full bg-glass-bg border border-glass text-secondary hover:text-matrix transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-matrix font-semibold mb-2">API Key Management</h3>
+                <p className="text-secondary text-sm mb-4">
+                  Your OpenAI API key is stored locally in your browser
+                </p>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => {
+                      setShowSettings(false);
+                      setShowApiKeySetup(true);
+                    }}
+                    className="btn-secondary w-full"
+                  >
+                    Update API Key
+                  </button>
+                  <button
+                    onClick={handleRemoveApiKey}
+                    className="btn-secondary w-full text-red-400 border-red-400/20 hover:bg-red-400/10"
+                  >
+                    Remove API Key
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* How It Works Modal */}
       <HowItWorksModal
