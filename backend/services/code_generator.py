@@ -15,9 +15,14 @@ settings = get_settings()
 
 
 class CodeGeneratorService:
-    def __init__(self):
+    def __init__(self, api_key: Optional[str] = None):
+        # Use provided API key or fall back to settings
+        effective_api_key = api_key or settings.openai_api_key
+        if not effective_api_key:
+            raise ValueError("OpenAI API key is required")
+
         self.llm = ChatOpenAI(
-            api_key=settings.openai_api_key,
+            api_key=effective_api_key,
             model=settings.openai_model,
             temperature=settings.openai_temperature,
             max_tokens=settings.openai_max_tokens

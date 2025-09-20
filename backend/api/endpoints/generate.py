@@ -1,5 +1,5 @@
-from fastapi import APIRouter, HTTPException, status, BackgroundTasks
-from typing import List
+from fastapi import APIRouter, HTTPException, status, BackgroundTasks, Header
+from typing import List, Optional
 import uuid
 import time
 import logging
@@ -19,8 +19,21 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
-# Initialize service
-generator_service = CodeGeneratorService()
+def extract_api_key_from_header(authorization: Optional[str] = Header(None)) -> str:
+    """Extract API key from Authorization header"""
+    if not authorization:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="OpenAI API key is required. Please provide it in the Authorization header."
+        )
+
+    if not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authorization header format. Use 'Bearer <api_key>'"
+        )
+
+    return authorization.replace("Bearer ", "").strip()
 
 
 @router.post(
@@ -29,15 +42,25 @@ generator_service = CodeGeneratorService()
     status_code=status.HTTP_200_OK,
     responses={
         400: {"model": ErrorResponse, "description": "Bad Request"},
+        401: {"model": ErrorResponse, "description": "Unauthorized - API key required"},
         500: {"model": ErrorResponse, "description": "Internal Server Error"}
     }
 )
-async def generate_code(request: GenerationRequest):
+async def generate_code(
+    request: GenerationRequest,
+    authorization: Optional[str] = Header(None)
+):
     """Generate code based on the provided prompt"""
     generation_id = f"gen_{uuid.uuid4().hex[:8]}"
     start_time = time.time()
 
     try:
+        # Extract API key from header
+        api_key = extract_api_key_from_header(authorization)
+
+        # Initialize service with user's API key
+        generator_service = CodeGeneratorService(api_key=api_key)
+
         logger.info(f"Starting generation {generation_id} for {request.programming_language.value}")
 
         # Generate code
@@ -83,12 +106,19 @@ async def generate_code(request: GenerationRequest):
     status_code=status.HTTP_200_OK,
     responses={
         400: {"model": ErrorResponse, "description": "Bad Request"},
+        401: {"model": ErrorResponse, "description": "Unauthorized - API key required"},
         500: {"model": ErrorResponse, "description": "Internal Server Error"}
     }
 )
-async def generate_batch(batch_request: BatchGenerationRequest):
+async def generate_batch(
+    batch_request: BatchGenerationRequest,
+    authorization: Optional[str] = Header(None)
+):
     """Generate multiple code snippets concurrently (max 3)"""
     try:
+        # Extract API key from header
+        api_key = extract_api_key_from_header(authorization)
+
         if len(batch_request.requests) > settings.max_concurrent_generations:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -98,7 +128,7 @@ async def generate_batch(batch_request: BatchGenerationRequest):
         # Process all requests concurrently
         tasks = []
         for request in batch_request.requests:
-            tasks.append(generate_code_async(request))
+            tasks.append(generate_code_async(request, api_key))
 
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
@@ -128,12 +158,15 @@ async def generate_batch(batch_request: BatchGenerationRequest):
         )
 
 
-async def generate_code_async(request: GenerationRequest) -> GenerationResponse:
+async def generate_code_async(request: GenerationRequest, api_key: str) -> GenerationResponse:
     """Async helper for batch generation"""
     generation_id = f"gen_{uuid.uuid4().hex[:8]}"
     start_time = time.time()
 
     try:
+        # Initialize service with user's API key
+        generator_service = CodeGeneratorService(api_key=api_key)
+
         # Generate code
         code = await generator_service.generate_code(request)
 

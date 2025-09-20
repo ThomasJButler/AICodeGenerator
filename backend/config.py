@@ -7,8 +7,8 @@ class Settings(BaseSettings):
     # Application
     app_name: str = "AI Code Generator"
     app_version: str = "1.0.0"
-    debug: bool = True
-    environment: str = "development"
+    debug: bool = False
+    environment: str = "production"
 
     # API Configuration
     api_host: str = "0.0.0.0"
@@ -16,13 +16,13 @@ class Settings(BaseSettings):
     api_prefix: str = "/api"
 
     # OpenAI
-    openai_api_key: str
+    openai_api_key: str = ""  # Optional - users provide their own
     openai_model: str = "gpt-4-turbo-preview"
     openai_temperature: float = 0.7
     openai_max_tokens: int = 4000
 
     # CORS
-    cors_origins: List[str] = ["http://localhost:3000", "http://localhost:3001"]
+    cors_origins: List[str] = []
     cors_credentials: bool = True
     cors_methods: List[str] = ["*"]
     cors_headers: List[str] = ["*"]
@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     rate_limit_period: int = 3600
 
     # Security
-    secret_key: str = "your-secret-key-here-change-in-production"
+    secret_key: str = "dev-secret-key-change-in-production"
     jwt_algorithm: str = "HS256"
     jwt_expiration_minutes: int = 10080
 
