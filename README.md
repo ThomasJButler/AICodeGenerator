@@ -6,12 +6,12 @@ A powerful AI-powered code generation platform that creates production-ready cod
 
 ## Features
 
-- 🚀 **Multi-Language Support**: Generate code in Python, JavaScript, TypeScript, Java, C#, Go, Rust, C++, Ruby, and Swift
-- 🧪 **Automatic Test Generation**: Creates comprehensive unit tests with framework detection
-- 📚 **Documentation Generation**: Generates inline comments, README files, and API documentation
-- 🎯 **Code Quality Metrics**: Analyzes complexity, readability, and performance
-- 🌍 **Multi-Language Prompts**: Support for prompts in multiple natural languages
-- 🎨 **Matrix-Themed UI**: Stunning cyberpunk-inspired interface with animations
+- **Multi-Language Support**: Generate code in Python, JavaScript, TypeScript, Java, C#, Go, Rust, C++, Ruby, and Swift
+- **Automatic Test Generation**: Creates comprehensive unit tests with framework detection
+- **Documentation Generation**: Generates inline comments, README files, and API documentation
+- **Code Quality Metrics**: Analyzes complexity, readability, and performance
+- **Multi-Language Prompts**: Support for prompts in multiple natural languages
+- **Matrix-Themed UI**: Stunning cyberpunk-inspired interface with animations
 
 ## Architecture
 
