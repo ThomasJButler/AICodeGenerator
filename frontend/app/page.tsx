@@ -102,25 +102,10 @@ export default function Home() {
     const storedKey = localStorage.getItem('openai_api_key');
     if (storedKey) {
       setApiKey(storedKey);
-    } else {
-      setShowApiKeySetup(true);
     }
+    // Don't show API key setup immediately - let users explore first
   }, []);
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
-        event.preventDefault();
-        if (!loading && prompt.trim() && apiKey) {
-          handleGenerate();
-        }
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [loading, prompt, apiKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Smooth scroll to results after generation
   useEffect(() => {
@@ -144,6 +129,12 @@ export default function Home() {
     setShowSettings(false);
   };
 
+  const handleRequireApiKey = () => {
+    if (!apiKey) {
+      setShowApiKeySetup(true);
+    }
+  };
+
   const handleGenerate = useCallback(async () => {
     if (!prompt.trim()) {
       setError('Please enter a prompt');
@@ -151,8 +142,7 @@ export default function Home() {
     }
 
     if (!apiKey) {
-      setError('Please set up your OpenAI API key first');
-      setShowApiKeySetup(true);
+      handleRequireApiKey();
       return;
     }
 
@@ -229,7 +219,26 @@ export default function Home() {
         setStatusMessage('');
       }, 2000);
     }
-  }, [prompt, language, naturalLanguage, projectGoals, includeTests, includeDocs, funnyStatusMessages, apiKey]);
+  }, [prompt, language, naturalLanguage, projectGoals, includeTests, includeDocs, funnyStatusMessages, apiKey, handleRequireApiKey]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+        event.preventDefault();
+        if (!loading && prompt.trim()) {
+          if (apiKey) {
+            handleGenerate();
+          } else {
+            handleRequireApiKey();
+          }
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [loading, prompt, apiKey, handleGenerate, handleRequireApiKey]);
 
   return (
     <div className="min-h-screen relative z-10">
@@ -310,6 +319,7 @@ export default function Home() {
               <textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
+                onFocus={handleRequireApiKey}
                 className="glass-input w-full h-32 resize-none focus-ring"
                 placeholder="Example: Create a function that calculates fibonacci numbers with memoization..."
               />
@@ -410,9 +420,9 @@ export default function Home() {
             {/* Generate Button */}
             <div className="space-y-2">
               <button
-                onClick={handleGenerate}
-                disabled={loading || !apiKey}
-                className={`btn-primary w-full ${loading || !apiKey ? 'opacity-50 cursor-not-allowed' : ''}`}
+                onClick={!apiKey ? handleRequireApiKey : handleGenerate}
+                disabled={loading}
+                className={`btn-primary w-full ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
               >
                 {loading ? <MatrixLoader /> : !apiKey ? 'Set up API Key to Generate' : 'Generate Code'}
               </button>

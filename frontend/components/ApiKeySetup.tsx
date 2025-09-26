@@ -98,22 +98,22 @@ export function ApiKeySetup({ onApiKeySet, onSkip, showSkip = false }: ApiKeySet
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className="glass-card max-w-lg w-full animate-scale-in">
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 bg-matrix/20 rounded-full">
-              <Key className="w-8 h-8 text-matrix" />
+    <div className="w-full max-w-lg mx-auto animate-scale-in">
+      <div className="glass-card w-full">
+        <div className="text-center mb-6">
+          <div className="flex justify-center mb-3">
+            <div className="p-2 bg-matrix/20 rounded-full">
+              <Key className="w-6 h-6 text-matrix" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-matrix mb-2">Setup OpenAI API Key</h1>
-          <p className="text-secondary">
+          <h1 className="text-2xl md:text-3xl font-bold text-matrix mb-2">Setup OpenAI API Key</h1>
+          <p className="text-secondary text-sm md:text-base">
             To generate code, you&apos;ll need to provide your own OpenAI API key
           </p>
         </div>
 
         {/* Security Information */}
-        <div className="glass-effect p-6 rounded-lg mb-8">
+        <div className="glass-effect p-4 md:p-6 rounded-lg mb-6">
           <div className="flex items-start space-x-3 mb-4">
             <Shield className="w-5 h-5 text-matrix mt-1 flex-shrink-0" />
             <div>
@@ -140,7 +140,7 @@ export function ApiKeySetup({ onApiKeySet, onSkip, showSkip = false }: ApiKeySet
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
           <div>
             <label className="block text-matrix text-sm font-medium mb-3">
               OpenAI API Key
@@ -199,7 +199,7 @@ export function ApiKeySetup({ onApiKeySet, onSkip, showSkip = false }: ApiKeySet
         </form>
 
         {/* Help Section */}
-        <div className="mt-8 pt-6 border-t border-glass">
+        <div className="mt-6 md:mt-8 pt-4 md:pt-6 border-t border-glass">
           <h3 className="text-matrix font-semibold mb-3">Need an OpenAI API Key?</h3>
           <div className="space-y-3 text-sm text-secondary">
             <div className="flex items-start space-x-2">
