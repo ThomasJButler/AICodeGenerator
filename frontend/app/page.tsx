@@ -129,11 +129,11 @@ export default function Home() {
     setShowSettings(false);
   };
 
-  const handleRequireApiKey = () => {
+  const handleRequireApiKey = useCallback(() => {
     if (!apiKey) {
       setShowApiKeySetup(true);
     }
-  };
+  }, [apiKey]);
 
   const handleGenerate = useCallback(async () => {
     if (!prompt.trim()) {

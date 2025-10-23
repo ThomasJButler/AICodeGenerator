@@ -1,3 +1,9 @@
+"""
+@author Tom Butler
+@date 2025-10-23
+@description LangChain-based code generation service using OpenAI GPT-4.
+             Generates code, tests, and documentation based on natural language prompts.
+"""
 import logging
 from typing import Optional, Dict, Any
 from langchain_openai import ChatOpenAI
@@ -15,8 +21,23 @@ settings = get_settings()
 
 
 class CodeGeneratorService:
+    """
+    Service for AI-powered code generation.
+
+    Creates separate LLM instance per request using user-provided API key.
+    Generates code, unit tests, and documentation for multiple programming languages.
+    """
+
     def __init__(self, api_key: Optional[str] = None):
-        # Use provided API key or fall back to settings
+        """
+        Initialises code generator with OpenAI API key.
+
+        Args:
+            api_key: User's OpenAI API key from Authorization header
+
+        Raises:
+            ValueError: If no API key provided
+        """
         effective_api_key = api_key or settings.openai_api_key
         if not effective_api_key:
             raise ValueError("OpenAI API key is required")
@@ -29,7 +50,18 @@ class CodeGeneratorService:
         )
 
     async def generate_code(self, request: GenerationRequest) -> str:
-        """Generate code based on the request"""
+        """
+        Generates production-ready code from natural language prompt.
+
+        Args:
+            request: Generation request with prompt, language, and options
+
+        Returns:
+            Generated code as string
+
+        Raises:
+            Exception: If LLM call fails
+        """
         try:
             prompt = self._create_code_prompt(request)
 
@@ -54,7 +86,19 @@ class CodeGeneratorService:
             raise
 
     async def generate_tests(self, code: str, request: GenerationRequest) -> TestResult:
-        """Generate unit tests for the code"""
+        """
+        Generates unit tests for provided code.
+
+        Selects appropriate test framework based on language.
+        Includes edge cases and coverage estimation.
+
+        Args:
+            code: Source code to generate tests for
+            request: Original generation request for context
+
+        Returns:
+            TestResult with test code, framework, and metrics
+        """
         try:
             framework = request.test_framework or self._get_default_test_framework(
                 request.programming_language.value
@@ -87,7 +131,16 @@ class CodeGeneratorService:
             raise
 
     async def generate_documentation(self, code: str, request: GenerationRequest) -> Documentation:
-        """Generate documentation for the code"""
+        """
+        Generates inline comments, README, and API documentation.
+
+        Args:
+            code: Source code to document
+            request: Original generation request for context
+
+        Returns:
+            Documentation with comments, README, API docs, and examples
+        """
         try:
             prompt = self._create_documentation_prompt(code, request)
 
@@ -128,7 +181,7 @@ Requirements:
 1. Code must be syntactically correct
 2. Follow best practices for {language}
 3. Include proper error handling
-4. Be efficient and optimized
+4. Be efficient and optimised
 5. Be well-structured and maintainable
 
 Return ONLY the code, wrapped in triple backticks with the language identifier.

@@ -1,14 +1,22 @@
+/**
+ * @author Tom Butler
+ * @date 2025-10-23
+ * @description Footer component with copyright, social links, and branding.
+ */
 'use client';
 
 import React from 'react';
 import { Github, Linkedin, Heart } from 'lucide-react';
 
+/**
+ * @return {JSX.Element}
+ * @constructor
+ */
 export function Footer() {
   return (
     <footer className="mt-16 py-8 border-t border-glass">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          {/* Copyright */}
           <div className="text-sm text-secondary">
             © 2025{' '}
             <a

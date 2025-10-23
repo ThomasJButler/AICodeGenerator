@@ -1,3 +1,9 @@
+"""
+@author Tom Butler
+@date 2025-10-23
+@description Code generation API endpoints.
+             Accepts user's OpenAI API key via Authorization header and generates code, tests, docs.
+"""
 from fastapi import APIRouter, HTTPException, status, BackgroundTasks, Header
 from typing import List, Optional
 import uuid
@@ -20,7 +26,18 @@ logger = logging.getLogger(__name__)
 settings = get_settings()
 
 def extract_api_key_from_header(authorization: Optional[str] = Header(None)) -> str:
-    """Extract API key from Authorization header"""
+    """
+    Extracts OpenAI API key from Authorization Bearer token.
+
+    Args:
+        authorization: Authorization header value
+
+    Returns:
+        API key string
+
+    Raises:
+        HTTPException: If header missing or malformed
+    """
     if not authorization:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -50,33 +67,43 @@ async def generate_code(
     request: GenerationRequest,
     authorization: Optional[str] = Header(None)
 ):
-    """Generate code based on the provided prompt"""
+    """
+    Generates code, tests, and documentation from natural language prompt.
+
+    Creates new CodeGeneratorService instance with user's API key.
+    Generates code first, then tests and docs in parallel if requested.
+
+    Args:
+        request: Generation request with prompt and options
+        authorization: Bearer token with OpenAI API key
+
+    Returns:
+        GenerationResponse with code, tests, docs, and metrics
+
+    Raises:
+        HTTPException: If API key invalid or generation fails
+    """
     generation_id = f"gen_{uuid.uuid4().hex[:8]}"
     start_time = time.time()
 
     try:
-        # Extract API key from header
         api_key = extract_api_key_from_header(authorization)
 
-        # Initialize service with user's API key
+        # Service instance created per request with user's API key
         generator_service = CodeGeneratorService(api_key=api_key)
 
         logger.info(f"Starting generation {generation_id} for {request.programming_language.value}")
 
-        # Generate code
         code = await generator_service.generate_code(request)
 
-        # Generate tests if requested
         tests = None
         if request.include_tests:
             tests = await generator_service.generate_tests(code, request)
 
-        # Generate documentation if requested
         documentation = None
         if request.include_docs:
             documentation = await generator_service.generate_documentation(code, request)
 
-        # Calculate metrics
         metrics = await generator_service.calculate_metrics(code, request.programming_language.value)
 
         processing_time = time.time() - start_time

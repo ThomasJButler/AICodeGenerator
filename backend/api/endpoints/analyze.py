@@ -1,3 +1,9 @@
+"""
+@author Tom Butler
+@date 2025-10-23
+@description Code analysis API endpoints.
+             Provides syntax validation, complexity metrics, and code formatting.
+"""
 from fastapi import APIRouter, HTTPException, status
 import logging
 
@@ -9,7 +15,6 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 settings = get_settings()
 
-# Initialize service
 analyzer_service = CodeAnalyzerService()
 
 
@@ -23,11 +28,21 @@ analyzer_service = CodeAnalyzerService()
     }
 )
 async def analyze_code(request: AnalysisRequest):
-    """Analyze code for syntax, complexity, and quality"""
-    try:
-        logger.info(f"Analyzing {request.language.value} code")
+    """
+    Analyses code for syntax validity, complexity, and quality metrics.
 
-        # Perform analysis
+    Args:
+        request: Analysis request with code and configuration flags
+
+    Returns:
+        AnalysisResponse with validation results, metrics, and suggestions
+
+    Raises:
+        HTTPException: If validation or analysis fails
+    """
+    try:
+        logger.info(f"Analysing {request.language.value} code")
+
         analysis_result = analyzer_service.analyze_code(request)
 
         # Extract metrics or use defaults

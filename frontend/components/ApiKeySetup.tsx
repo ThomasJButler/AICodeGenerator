@@ -1,3 +1,9 @@
+/**
+ * @author Tom Butler
+ * @date 2025-10-23
+ * @description API key setup modal for OpenAI authentication.
+ *              Validates key against OpenAI API and stores in localStorage.
+ */
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -9,6 +15,14 @@ interface ApiKeySetupProps {
   showSkip?: boolean;
 }
 
+/**
+ * @param {Object} props
+ * @param {Function} props.onApiKeySet - Callback fired when valid API key is set
+ * @param {Function} [props.onSkip] - Optional callback to skip setup
+ * @param {boolean} [props.showSkip=false] - Whether to show skip button
+ * @return {JSX.Element}
+ * @constructor
+ */
 export function ApiKeySetup({ onApiKeySet, onSkip, showSkip = false }: ApiKeySetupProps) {
   const [apiKey, setApiKey] = useState('');
   const [showKey, setShowKey] = useState(false);
@@ -16,8 +30,10 @@ export function ApiKeySetup({ onApiKeySet, onSkip, showSkip = false }: ApiKeySet
   const [validationStatus, setValidationStatus] = useState<'idle' | 'valid' | 'invalid' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
+  /**
+   * @constructs - Checks for existing API key in localStorage on mount
+   */
   useEffect(() => {
-    // Check if there's already an API key stored
     const storedKey = localStorage.getItem('openai_api_key');
     if (storedKey) {
       setApiKey(storedKey);
@@ -25,6 +41,12 @@ export function ApiKeySetup({ onApiKeySet, onSkip, showSkip = false }: ApiKeySet
     }
   }, []);
 
+  /**
+   * Validates API key by making test request to OpenAI API.
+   * Stores key in localStorage if valid.
+   *
+   * @param {string} key - API key to validate
+   */
   const validateApiKey = async (key: string) => {
     if (!key.trim()) {
       setValidationStatus('idle');

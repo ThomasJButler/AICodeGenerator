@@ -1,3 +1,9 @@
+"""
+@author Tom Butler
+@date 2025-10-23
+@description Language capabilities endpoint.
+             Returns supported programming languages, natural languages, and test frameworks.
+"""
 from fastapi import APIRouter, status
 import logging
 
@@ -15,7 +21,12 @@ settings = get_settings()
     status_code=status.HTTP_200_OK
 )
 async def get_supported_languages():
-    """Get all supported programming and natural languages"""
+    """
+    Returns all supported languages and test frameworks.
+
+    Returns:
+        LanguagesResponse with programming languages, natural languages, and framework mappings
+    """
     try:
         # Programming languages with details
         programming_languages = [
