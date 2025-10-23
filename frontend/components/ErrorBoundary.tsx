@@ -34,7 +34,7 @@ export class ErrorBoundary extends Component<Props, State> {
     };
   }
 
-  static getDerivedStateFromError(error: Error): Partial<State> {
+  static getDerivedStateFromError(_error: Error): Partial<State> {
     return { hasError: true };
   }
 
@@ -71,7 +71,7 @@ export class ErrorBoundary extends Component<Props, State> {
               <div>
                 <h1 className="text-3xl font-bold text-matrix mb-2">Something went wrong</h1>
                 <p className="text-secondary">
-                  We encountered an unexpected error. This has been logged and we'll look into it.
+                  We encountered an unexpected error. This has been logged and we&apos;ll look into it.
                 </p>
               </div>
 
