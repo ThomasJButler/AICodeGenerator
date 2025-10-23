@@ -1,3 +1,9 @@
+"""
+@author Tom Butler
+@date 2025-10-23
+@description Code analysis service using tree-sitter for syntax validation.
+             Calculates complexity metrics and generates improvement suggestions.
+"""
 import logging
 from typing import Dict, List, Any, Optional
 try:
@@ -17,12 +23,23 @@ logger = logging.getLogger(__name__)
 
 
 class CodeAnalyzerService:
+    """
+    Service for static code analysis and quality metrics.
+
+    Uses tree-sitter for AST parsing and syntax validation.
+    Falls back to Python compile() when tree-sitter unavailable.
+    """
+
     def __init__(self):
         self.parsers = {}
         self._init_parsers()
 
     def _init_parsers(self):
-        """Initialize Tree-sitter parsers for supported languages"""
+        """
+        Initialises tree-sitter parsers for all supported languages.
+
+        Gracefully handles missing parsers and logs warnings.
+        """
         if not TREE_SITTER_AVAILABLE:
             logger.warning("Tree-sitter not available, syntax parsing will be limited")
             return
@@ -47,7 +64,21 @@ class CodeAnalyzerService:
                 logger.warning(f"Could not load parser for {lang}: {e}")
 
     def analyze_code(self, request: AnalysisRequest) -> Dict[str, Any]:
-        """Analyze code for syntax, complexity, and quality"""
+        """
+        Analyses code for syntax validity, complexity, and quality.
+
+        Performs requested checks based on AnalysisRequest flags.
+        Returns comprehensive analysis including issues, metrics, and suggestions.
+
+        Args:
+            request: Analysis request with code and check flags
+
+        Returns:
+            Dictionary containing validation results, issues, metrics, suggestions, AST, formatted code
+
+        Raises:
+            Exception: If analysis fails
+        """
         try:
             result = {
                 "valid": False,
@@ -58,19 +89,16 @@ class CodeAnalyzerService:
                 "formatted_code": None
             }
 
-            # Check syntax
             if request.check_syntax:
                 syntax_result = self._check_syntax(request.code, request.language.value)
                 result["valid"] = syntax_result["valid"]
                 result["issues"].extend(syntax_result.get("issues", []))
                 result["ast_structure"] = syntax_result.get("ast")
 
-            # Calculate complexity
             if request.check_complexity:
                 metrics = self._calculate_metrics(request.code, request.language.value)
                 result["metrics"] = metrics
 
-            # Get suggestions
             if request.suggest_improvements:
                 suggestions = self._generate_suggestions(
                     request.code,
@@ -79,7 +107,6 @@ class CodeAnalyzerService:
                 )
                 result["suggestions"] = suggestions
 
-            # Format code
             if request.format_code:
                 formatted = self._format_code(request.code, request.language.value)
                 result["formatted_code"] = formatted
@@ -91,11 +118,22 @@ class CodeAnalyzerService:
             raise
 
     def _check_syntax(self, code: str, language: str) -> Dict[str, Any]:
-        """Check syntax using Tree-sitter"""
+        """
+        Validates syntax using tree-sitter AST parsing.
+
+        Falls back to Python compile() for Python when tree-sitter unavailable.
+        For other languages without tree-sitter, assumes valid syntax.
+
+        Args:
+            code: Source code to validate
+            language: Programming language identifier
+
+        Returns:
+            Dictionary with valid flag, issues list, and AST structure
+        """
         result = {"valid": True, "issues": [], "ast": None}
 
         if not TREE_SITTER_AVAILABLE:
-            # Fallback: basic syntax check using compile for Python
             if language == "python":
                 try:
                     compile(code, '<string>', 'exec')

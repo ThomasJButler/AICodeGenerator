@@ -1,3 +1,9 @@
+/**
+ * @author Tom Butler
+ * @date 2025-10-23
+ * @description Syntax-highlighted code display component with copy and download.
+ *              Uses Prism for highlighting with Matrix-themed customisation.
+ */
 'use client';
 
 import React, { useState } from 'react';
@@ -12,6 +18,15 @@ interface CodeDisplayProps {
   showLineNumbers?: boolean;
 }
 
+/**
+ * @param {Object} props
+ * @param {string} props.code - Code to display
+ * @param {string} props.language - Programming language for syntax highlighting
+ * @param {string} [props.title='Generated Code'] - Display title
+ * @param {boolean} [props.showLineNumbers=true] - Whether to show line numbers
+ * @return {JSX.Element}
+ * @constructor
+ */
 export function CodeDisplay({
   code,
   language,
@@ -20,12 +35,18 @@ export function CodeDisplay({
 }: CodeDisplayProps) {
   const [copied, setCopied] = useState(false);
 
+  /**
+   * Copies code to clipboard and shows confirmation for 2 seconds.
+   */
   const handleCopy = async () => {
     await navigator.clipboard.writeText(code);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
+  /**
+   * Downloads code as file with appropriate extension.
+   */
   const handleDownload = () => {
     const extension = getFileExtension(language);
     const blob = new Blob([code], { type: 'text/plain' });

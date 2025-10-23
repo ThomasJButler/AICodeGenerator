@@ -1,9 +1,16 @@
+"""
+@author Tom Butler
+@date 2025-10-23
+@description Request models for code generation and analysis endpoints.
+             Defines supported languages, validation rules, and request structures.
+"""
 from pydantic import BaseModel, Field, validator
 from typing import Optional, List, Literal
 from enum import Enum
 
 
 class ProgrammingLanguage(str, Enum):
+    """Supported programming languages for code generation."""
     PYTHON = "python"
     JAVASCRIPT = "javascript"
     TYPESCRIPT = "typescript"
@@ -17,6 +24,7 @@ class ProgrammingLanguage(str, Enum):
 
 
 class NaturalLanguage(str, Enum):
+    """Supported natural languages for prompts and documentation."""
     ENGLISH = "english"
     SPANISH = "spanish"
     FRENCH = "french"
@@ -30,6 +38,7 @@ class NaturalLanguage(str, Enum):
 
 
 class GenerationRequest(BaseModel):
+    """Request model for code generation endpoint with validation rules."""
     prompt: str = Field(
         ...,
         min_length=1,
@@ -91,11 +100,12 @@ class GenerationRequest(BaseModel):
 
 
 class AnalysisRequest(BaseModel):
+    """Request model for code analysis endpoint with configurable checks."""
     code: str = Field(
         ...,
         min_length=1,
         max_length=10000,
-        description="Code to analyze"
+        description="Code to analyse"
     )
     language: ProgrammingLanguage = Field(
         ...,
@@ -107,7 +117,7 @@ class AnalysisRequest(BaseModel):
     )
     check_complexity: bool = Field(
         default=True,
-        description="Analyze code complexity"
+        description="Analyse code complexity"
     )
     suggest_improvements: bool = Field(
         default=True,

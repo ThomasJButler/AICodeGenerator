@@ -1,3 +1,9 @@
+"""
+@author Tom Butler
+@date 2025-10-23
+@description Pydantic models for request/response validation.
+             Centralised imports for API data structures.
+"""
 from .request import (
     GenerationRequest,
     AnalysisRequest,
@@ -19,13 +25,11 @@ from .response import (
 )
 
 __all__ = [
-    # Request models
     "GenerationRequest",
     "AnalysisRequest",
     "BatchGenerationRequest",
     "ProgrammingLanguage",
     "NaturalLanguage",
-    # Response models
     "GenerationResponse",
     "AnalysisResponse",
     "LanguagesResponse",

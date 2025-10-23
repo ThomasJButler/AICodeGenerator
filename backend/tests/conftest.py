@@ -1,3 +1,9 @@
+"""
+@author Tom Butler
+@date 2025-10-23
+@description Pytest fixtures and configuration for backend tests.
+             Provides test client, mock responses, and environment setup.
+"""
 import os
 import sys
 import pytest
@@ -5,10 +11,8 @@ from unittest.mock import Mock, patch, AsyncMock
 from typing import Generator
 import asyncio
 
-# Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Set required environment variables before importing the app
 os.environ["OPENAI_API_KEY"] = "test-api-key"
 os.environ["DEBUG"] = "True"
 os.environ["ENVIRONMENT"] = "testing"
@@ -19,7 +23,7 @@ from main import app
 
 @pytest.fixture(scope="session")
 def event_loop():
-    """Create an instance of the default event loop for the test session."""
+    """Creates event loop instance for async test session."""
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()
