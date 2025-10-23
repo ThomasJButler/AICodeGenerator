@@ -1,7 +1,17 @@
+/**
+ * @author Tom Butler
+ * @date 2025-10-23
+ * @description Matrix-themed loading animations.
+ *              Provides pulsing dots and spinning loader variants.
+ */
 'use client';
 
 import React from 'react';
 
+/**
+ * @return {JSX.Element}
+ * @constructor
+ */
 export function MatrixLoader() {
   return (
     <div className="flex items-center justify-center space-x-3">
