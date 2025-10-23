@@ -1,3 +1,9 @@
+"""
+@author Tom Butler
+@date 2025-10-23
+@description FastAPI application entry point for AI Code Generator.
+             Configures CORS, logging, and routes for code generation endpoints.
+"""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -6,7 +12,6 @@ import logging
 from config import get_settings
 from api.endpoints import generate, analyze, languages, health
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -18,18 +23,20 @@ settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
+    """
+    Application lifespan manager for startup and shutdown events.
+
+    Logs application configuration on startup and cleanup on shutdown.
+    """
     logger.info(f"Starting {settings.app_name} v{settings.app_version}")
     logger.info(f"Environment: {settings.environment}")
     logger.info(f"Debug mode: {settings.debug}")
 
     yield
 
-    # Shutdown
     logger.info("Shutting down application")
 
 
-# Create FastAPI app
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
@@ -40,7 +47,8 @@ app = FastAPI(
     openapi_url=f"{settings.api_prefix}/openapi.json"
 )
 
-# Configure CORS
+# CORS configured to accept requests from frontend origin
+# Users provide their own OpenAI API key via Authorization header
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins,
@@ -49,7 +57,6 @@ app.add_middleware(
     allow_headers=settings.cors_headers,
 )
 
-# Include routers
 app.include_router(health.router, prefix=settings.api_prefix, tags=["health"])
 app.include_router(generate.router, prefix=settings.api_prefix, tags=["generation"])
 app.include_router(analyze.router, prefix=settings.api_prefix, tags=["analysis"])
@@ -58,6 +65,7 @@ app.include_router(languages.router, prefix=settings.api_prefix, tags=["language
 
 @app.get("/")
 async def root():
+    """Root endpoint returning API status and documentation URL."""
     return {
         "name": settings.app_name,
         "version": settings.app_version,
