@@ -1,3 +1,9 @@
+"""
+@author Tom Butler
+@date 2025-10-23
+@description Health check endpoint for monitoring API status.
+             Returns operational status of API and external dependencies.
+"""
 from fastapi import APIRouter, status
 from datetime import datetime
 import logging
@@ -12,7 +18,12 @@ settings = get_settings()
 
 @router.get("/health", response_model=HealthResponse, status_code=status.HTTP_200_OK)
 async def health_check():
-    """Check the health status of the API and its dependencies"""
+    """
+    Health check endpoint for monitoring and load balancers.
+
+    Returns:
+        HealthResponse with API status, version, timestamp, and service states
+    """
     try:
         services_status = {}
 
