@@ -246,7 +246,7 @@ export default function Home() {
       <nav className="p-4 md:p-6 border-b border-glass">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <a
-            href="https://www.aitomatic.io/"
+            href="https://agenticaiprojectsportfolio.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-secondary flex items-center space-x-2 min-h-[44px]"
