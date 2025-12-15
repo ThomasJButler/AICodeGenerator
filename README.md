@@ -1,6 +1,5 @@
-# AI Code Generator
 
-Full-stack code generation platform. Describe what you want, get production-ready code with tests and docs.
+A Full-stack code generation platform. Describe what you want, get production-ready code with tests and docs.
 
 <img width="1382" height="843" alt="image" src="https://github.com/user-attachments/assets/b91e798e-df62-48c5-8100-6ad043edcabc" />
 
